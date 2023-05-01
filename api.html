@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mars Rover Photos Analysis</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+      body {
+          font-family: Arial, sans-serif;
+          margin: 0;
+          padding: 0;
+          background-color: #f0f2f5;
+      }
+      .container {
+          max-width: 960px;
+          margin: 0 auto;
+          padding: 2rem;
+          background-color: white;
+          box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+          border-radius: 5px;
+      }
+      h1 {
+          text-align: center;
+          font-size: 2.5rem;
+          color: #333;
+          margin-bottom: 1rem;
+      }
+      p {
+          font-size: 1.2rem;
+          text-align: justify;
+          padding: 0 1rem;
+          color: #555;
+          line-height: 1.5;
+          margin-bottom: 2rem;
+      }
+      button {
+          display: block;
+          margin: 1rem auto;
+          padding: 0.5rem 2rem;
+          font-size: 1rem;
+          font-weight: bold;
+          color: white;
+          background-color: #3498db;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          transition: background-color 0.3s;
+      }
+      button:hover {
+          background-color: #2980b9;
+      }
+      canvas {
+          display: block;
+          margin: 0 auto;
+      }
+  </style>
+  </head>
+<body>
+    <div class="container">
+        <h1>Mars Rover Photos Analysis</h1>
+        <p>
+          This interactive chart displays the number of Mars rover photos taken over time, illustrating the progression of space exploration and the increasing capabilities of rovers. By analyzing the data, we can observe trends in the frequency of photo-taking and better understand the priorities of various rover missions. The x-axis represents time (by year), while the y-axis represents the total number of photos taken. The chart offers valuable insights into the continuous efforts of NASA and other space agencies to explore and understand the Red Planet.
+        </p>
+        <button onclick="refreshCharts()">Refresh</button>
+        <h2>Mars Rover Photos Over Time</h2>
+        <canvas id="marsRoverPhotosChart" width="800" height="400"></canvas>
+        <h2>Comparison of Mars Rovers by Photos Taken</h2>
+        <canvas id="marsRoverComparisonChart" width="800" height="400"></canvas>
+    </div>
+
+    <script>
+        const apiKey = 'bCkCaJrKz5x49axrYdIL6JB81QHQqZ3fwYYQMjWS';
+        const apiUrl = `https://api.nasa.gov/mars-photos/api/v1/rovers?api_key=${apiKey}`;
+        const photosChartElement = document.getElementById('marsRoverPhotosChart');
+        const comparisonChartElement = document.getElementById('marsRoverComparisonChart');
+
+        let photosChart;
+        let comparisonChart;
+
+        async function fetchData() {
+    const response = await axios.get(apiUrl);
+    const rovers = response.data.rovers;
+
+    const years = [];
+    const photoCounts = [];
+    const roverNames = [];
+
+    for (const rover of rovers) {
+        roverNames.push(rover.name);
+        const launchYear = new Date(rover.launch_date).getFullYear();
+        if (!years.includes(launchYear)) {
+            years.push(launchYear);
+            photoCounts.push(rover.total_photos);
+        } else {
+            const index = years.indexOf(launchYear);
+            photoCounts[index] += rover.total_photos;
+        }
+    }
+
+    return { years, photoCounts, roverNames };
+}
+
+function createPhotosChart(years, photoCounts) {
+    if (photosChart) {
+        photosChart.destroy();
+    }
+
+    photosChart = new Chart(photosChartElement, {
+        type: 'line',
+        data: {
+            labels: years,
+            datasets: [{
+                label: 'Number of Mars Rover Photos',
+                data: photoCounts,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+
+        async function refreshCharts() {
+            const { years, photoCounts, rovers } = await fetchData();
+
+            createPhotosChart(years, photoCounts);
+            createComparisonChart(rovers, photoCounts);
+        }
+
+        // Initialize the charts on page load
+        refreshCharts();
+    </script>
+</body>
+</html>
