@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <style>
+		body {
+			background-color: #f4f4f4;
+			font-family: Arial, sans-serif;
+		}
+
+		.container {
+			max-width: 800px;
+			margin: 0 auto;
+			padding: 20px;
+		}
+
+		h1 {
+			color: #333;
+			text-align: center;
+		}
+
+		p {
+			line-height: 1.6em;
+		}
+
+		#btn_1 {
+			display: block;
+			width: 200px;
+			height: 50px;
+			margin: 20px auto;
+			background-color: #333;
+			color: #fff;
+			border: none;
+			border-radius: 5px;
+			cursor: pointer;
+		}
+
+		#btn_1:hover {
+			background-color: #444;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<h1>Mars Rover Photos Over Time</h1>
+		<p>Exploring the progress of Mars exploration by tracking the number of photos taken by Mars rovers over time.</p>
+<p>The Mars Rover Photo Frequency chart displays the number of photos taken by Mars rovers over time. The chart shows the progression of Mars exploration and the technological advancements that have allowed for more frequent and detailed photos of the planet. The data spans from 1996, when the first rover, Sojourner, landed on Mars, to the present day, where the latest rover, Perseverance, is currently exploring the planet. The chart is a testament to the ongoing importance of Mars exploration and the role that technology plays in advancing our knowledge of the universe.
+</p>
+<h1>Rover Lifespan Comparison</h1>
+		<p>The Rover Lifespan Comparison chart compares the operational lifespan of each rover. It shows the number of days each rover remained active on Mars, from the landing date to the last date a photo was taken. The chart provides insights into the durability and longevity of each rover's mission on the Martian surface.</p>
+	
+        <form>
+			<input type="button" value="Fetch Data" id="btn_1">
+		</form>
+		<br><br><br>
+		<div id="output"></div>
+	</div>
+</body>
+<script>
+
+function fetchRoverData(){
+	console.log("Fetching data...");
+
+	$.getJSON("https://api.nasa.gov/mars-photos/api/v1/rovers?api_key=bCkCaJrKz5x49axrYdIL6JB81QHQqZ3fwYYQMjWS",function(result){
+		console.log(result);
+		let newdata = [];
+		for(let i=0;i < result.rovers.length;i++){
+			let item = []; 
+			item[0] = result.rovers[i]["name"];
+			item[1] = result.rovers[i]["total_photos"];	
+			newdata[i] = item;
+		};
+		console.log(newdata);
+		plotTheChart(newdata);
+	});
+}
+
+function plotTheChart(data){
+	let names = "";
+	let photoCounts = "";
+	for (let i = 0; i < data.length; i++){
+		names = names + data[i][0];
+		photoCounts = photoCounts + data[i][1];
+		if (i < data.length - 1){
+			names = names + "|";
+			photoCounts = photoCounts + ",";
+		}
+	}
+	console.log(names);
+	console.log(photoCounts);
+	
+	let imageurl = "https://image-charts.com/chart?"
+	imageurl = imageurl + "chco=3072F3&"
+	imageurl = imageurl + "chd=a:" + photoCounts + "&"
+	imageurl = imageurl + "chdl=Number of Photos&"
+	imageurl = imageurl + "chdlp=t&"
+	imageurl = imageurl + "chl=" + names + "&"
+	imageurl = imageurl + "chls=2,4,1&"
+	imageurl = imageurl + "chs=700x500&"
+	imageurl = imageurl + "cht=lc&"
+	imageurl = imageurl + "chxt=x,y";
+
+	console.log(imageurl);
+
+	$("#output").html("<img src='" + imageurl + "'>"); 
+}
+
+$('#btn_1').click(function(){
+	fetchRoverData();
+})
+
+function fetchRoverLifespanData(){
+    console.log("Fetching lifespan data...");
+
+    $.getJSON("https://api.nasa.gov/mars-photos/api/v1/rovers?api_key=bCkCaJrKz5x49axrYdIL6JB81QHQqZ3fwYYQMjWS",function(result){
+        console.log(result);
+        let newdata = [];
+        for(let i=0;i < result.rovers.length;i++){
+            let item = [];
+            item[0] = result.rovers[i]["name"];
+            let landingDate = new Date(result.rovers[i]["landing_date"]);
+            let lastPhotoDate = new Date(result.rovers[i]["max_date"]);
+            let lifespan = Math.floor((lastPhotoDate - landingDate) / (1000 * 60 * 60 * 24));
+            item[1] = lifespan;
+            newdata[i] = item;
+        };
+        console.log(newdata);
+        plotLifespanChart(newdata);
+    });
+}
+
+function plotLifespanChart(data){
+    let names = "";
+    let lifespans = "";
+    for (let i = 0; i < data.length; i++){
+        names = names + data[i][0];
+        lifespans = lifespans + data[i][1];
+        if (i < data.length - 1){
+            names = names + "|";
+            lifespans = lifespans + ",";
+        }
+    }
+    console.log(names);
+    console.log(lifespans);
+    
+    let imageurl = "https://image-charts.com/chart?"
+    imageurl = imageurl + "chco=3072F3&"
+    imageurl = imageurl + "chd=a:" + lifespans + "&"
+    imageurl = imageurl + "chdl=Days Active&"
+    imageurl = imageurl + "chdlp=t&"
+    imageurl = imageurl + "chl=" + names + "&"
+    imageurl = imageurl + "chls=2,4,1&"
+    imageurl = imageurl + "chs=700x500&"
+    imageurl = imageurl + "cht=bvs&"
+    imageurl = imageurl + "chxt=x,y";
+
+    console.log(imageurl);
+
+    // Add the new chart to the page after the first one
+    $("#output").append("<br><img src='" + imageurl + "'>"); 
+}
+
+$('#btn_1').click(function(){
+    fetchRoverData();
+    fetchRoverLifespanData();
+})
+
+
+</script>
+</html>
